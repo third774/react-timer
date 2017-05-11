@@ -4,10 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server.js | webpack -w",
     "build": "webpack -p",
     "test": "karma start",
-    "dev": "node server.js | webpack -w",
     "deploy": "git push heroku master"
   },
   "author": "",
