@@ -5,19 +5,20 @@ var Controls = require('./Controls');
 var Countdown = React.createClass({
 
   getInitialState: function () {
-    return {
-      count: 0,
-      countdownStatus: 'stopped'
-    }
+    return {count: 0, countdownStatus: 'stopped'}
   },
 
-  componentDidUpdate: function(prevProps, prevState) {
+  componentWillUnmount: function () {
+    clearInterval(this.timer);
+    this.timer = undefined;
+    this.setState({count: 0, countdownStatus: 'stopped'});
+  },
+
+  componentDidUpdate: function (prevProps, prevState) {
     if (this.state.countdownStatus !== prevState.countdownStatus) {
       switch (this.state.countdownStatus) {
         case 'stopped':
-          this.setState({
-            count: 0
-          });
+          this.setState({count: 0});
         case 'paused':
           clearInterval(this.timer);
           this.timer = undefined;
@@ -31,20 +32,23 @@ var Countdown = React.createClass({
     }
   },
 
-  startTimer: function() {
+  startTimer: function () {
     this.timer = setInterval(() => {
       var newCount = this.state.count - 1;
       this.setState({
-        count: newCount >= 0 ? newCount: 0
+        count: newCount >= 0
+          ? newCount
+          : 0
       });
+
+      if (newCount === 0) {
+        this.setState({countdownStatus: 'stopped'});
+      }
     }, 1000);
   },
 
   handleSetCountdown: function (seconds) {
-    this.setState({
-      count: seconds,
-      countdownStatus: 'started'
-    });
+    this.setState({count: seconds, countdownStatus: 'started'});
   },
 
   handleStatusChange(newStatus) {
@@ -53,12 +57,14 @@ var Countdown = React.createClass({
 
   render: function () {
     var {count, countdownStatus} = this.state;
-    
+
     var renderControlArea = () => {
       if (countdownStatus !== 'stopped') {
-        return <Controls countdownStatus={countdownStatus} onStatusChange={this.handleStatusChange}></Controls>;
+        return <Controls
+          countdownStatus={countdownStatus}
+          onStatusChange={this.handleStatusChange}></Controls>;
       } else {
-        return <CountdownForm onSetCountdown={this.handleSetCountdown}></CountdownForm>;      
+        return <CountdownForm onSetCountdown={this.handleSetCountdown}></CountdownForm>;
       }
     };
 
